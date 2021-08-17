@@ -7,6 +7,7 @@ import discord
 from discord_slash.client import SlashCommand
 from discord_slash.utils.manage_components import create_button, create_actionrow
 from discord_slash.model import ButtonStyle
+import asyncio
 
 bot = commands.Bot(command_prefix=("t.",), case_insensitive=True)
 slash = SlashCommand(bot, sync_commands=True)
@@ -77,7 +78,11 @@ async def create_ticket(ctx):
         ]
     )
 
-    await ticket_channel.send("Yo press dis to close ticket", components=[action_row])
+    await ticket_channel.send(f"Yo press dis to close ticket", components=[action_row])
+    await ticket_channel.send(f"{ctx.author.mention}, Type in your issue here!")
+    delete_soon = await ctx.send("Ticket created!, I've pinged you in the channel.")
+    await asyncio.sleep(1)
+    delete_soon.delete()
 
 
 @slash.component_callback()
