@@ -66,6 +66,7 @@ async def create_ticket(ctx):
         position=0,
         reason="New Ticket Opened"
     )
+    await ticket_channel.set_permissions(ctx.author, read_messages=True, send_messages=True, read_message_history=True)
 
     action_row = create_actionrow(
         *[
