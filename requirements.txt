@@ -1,2 +1,6 @@
 discord
 discord-py-slash-command
+requests
+pytz
+emoji
+grapheme
