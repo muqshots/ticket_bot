@@ -82,7 +82,7 @@ async def create_ticket(ctx):
     await ticket_channel.send(f"{ctx.author.mention}, Type in your issue here!")
     delete_soon = await ctx.send("Ticket created!, I've pinged you in the channel.")
     await asyncio.sleep(1)
-    delete_soon.delete()
+    await delete_soon.delete()
 
 
 @slash.component_callback()
