@@ -1,5 +1,6 @@
 import re
 from .emoji_convert import convert_emoji
+from ansi2html import Ansi2HTMLConverter
 
 
 class ParseMarkdown:
@@ -69,11 +70,11 @@ class ParseMarkdown:
 
     def parse_normal_markdown(self):
         holder = [r"__(.*?)__", '<span style="text-decoration: underline">%s</span>'], \
-                 [r"\*\*(.*?)\*\*", '<strong>%s</strong>'], \
-                 [r"\*(.*?)\*", '<em>%s</em>'], \
-                 [r"~~(.*?)~~", '<span style="text-decoration: line-through">%s</span>'], \
-                 [r"\|\|(.*?)\|\|", '<span class="spoiler spoiler--hidden" onclick="showSpoiler(event, this)"> <span '
-                                    'class="spoiler-text">%s</span></span>']
+            [r"\*\*(.*?)\*\*", '<strong>%s</strong>'], \
+            [r"\*(.*?)\*", '<em>%s</em>'], \
+            [r"~~(.*?)~~", '<span style="text-decoration: line-through">%s</span>'], \
+            [r"\|\|(.*?)\|\|", '<span class="spoiler spoiler--hidden" onclick="showSpoiler(event, this)"> <span '
+                               'class="spoiler-text">%s</span></span>']
 
         for x in holder:
             p, r = x
@@ -120,7 +121,7 @@ class ParseMarkdown:
     def parse_code_block_markdown(self):
         markdown_languages = ["asciidoc", "autohotkey", "bash", "coffeescript", "cpp", "cs", "css",
                               "diff", "fix", "glsl", "ini", "json", "md", "ml", "prolog", "py",
-                              "tex", "xl", "xml", "js", "html"]
+                              "tex", "xl", "xml", "js", "html", "ansi"]
         self.content = re.sub(r"\n", "<br>", self.content)
 
         # ```code```
@@ -135,17 +136,27 @@ class ParseMarkdown:
                     language_class = "language=" + language
                     _, _, affected_text = affected_text.partition('<br>')
 
-            affected_text = self.return_to_markdown(affected_text)
+            if language_class == "language=ansi":
+                affected_text = Ansi2HTMLConverter().convert(affected_text.replace("\u200b", " "))
+                x = re.search('(?<=<style type="text/css">\n)(.*?)(?=</style>)', affected_text, flags=re.S).group(1)
+                y = re.search('(?<=<pre class="ansi2html-content">\n)(.*?)(?=\n</pre>)', affected_text, flags=re.S).group(
+                    1)
+                affected_text = '<style type="text/css">' + x + '</style>' + y
+                self.content = self.content.replace(self.content[match.start():match.end()],
+                                                    '<div class="pre pre--multiline nohljs">%s</div>' %
+                                                    affected_text.replace("&lt;br&gt;", "</br>").replace("â", ""))
+            else:
+                affected_text = self.return_to_markdown(affected_text)
 
-            second_pattern = re.compile(r"^<br>|<br>$")
-            second_match = re.search(second_pattern, affected_text)
-            while second_match is not None:
-                affected_text = re.sub(r"^<br>|<br>$", '', affected_text)
+                second_pattern = re.compile(r"^<br>|<br>$")
                 second_match = re.search(second_pattern, affected_text)
+                while second_match is not None:
+                    affected_text = re.sub(r"^<br>|<br>$", '', affected_text)
+                    second_match = re.search(second_pattern, affected_text)
 
-            self.content = self.content.replace(self.content[match.start():match.end()],
-                                                '<div class="pre pre--multiline %s">%s</div>' %
-                                                (language_class, affected_text))
+                self.content = self.content.replace(self.content[match.start():match.end()],
+                                                    '<div class="pre pre--multiline %s">%s</div>' %
+                                                    (language_class, affected_text))
             match = re.search(pattern, self.content)
 
         # ``code``
@@ -212,12 +223,12 @@ class ParseMarkdown:
     @staticmethod
     def return_to_markdown(content):
         holders = [r"<strong>(.*?)</strong>", '**%s**'], \
-                  [r"<em>([^<>]+)</em>", '*%s*'], \
-                  [r'<span style="text-decoration: underline">([^<>]+)</span>', '__%s__'], \
-                  [r'<span style="text-decoration: line-through">([^<>]+)</span>', '~~%s~~'], \
-                  [r'<div class="quote">(.*?)</div>', '> %s'], \
-                  [r'<span class="spoiler spoiler--hidden" onclick="showSpoiler\(event, this\)"> <span '
-                   r'class="spoiler-text">(.*?)<\/span><\/span>', '||%s||']
+            [r"<em>([^<>]+)</em>", '*%s*'], \
+            [r'<span style="text-decoration: underline">([^<>]+)</span>', '__%s__'], \
+            [r'<span style="text-decoration: line-through">([^<>]+)</span>', '~~%s~~'], \
+            [r'<div class="quote">(.*?)</div>', '> %s'], \
+            [r'<span class="spoiler spoiler--hidden" onclick="showSpoiler\(event, this\)"> <span '
+             r'class="spoiler-text">(.*?)<\/span><\/span>', '||%s||']
 
         for x in holders:
             p, r = x

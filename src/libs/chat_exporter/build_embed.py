@@ -5,6 +5,11 @@ from .build_html import fill_out, embed_body, embed_title, embed_description, em
     PARSE_MODE_EMBED, PARSE_MODE_SPECIAL_EMBED, PARSE_MODE_NONE, PARSE_MODE_MARKDOWN
 
 
+try:
+    EmptyEmbed = discord.Embed.Empty
+except AttributeError:
+    EmptyEmbed = None
+
 class BuildEmbed:
     r: str
     g: str
@@ -36,12 +41,12 @@ class BuildEmbed:
 
     def build_colour(self):
         self.r, self.g, self.b = (self.embed.colour.r, self.embed.colour.g, self.embed.colour.b) \
-            if self.embed.colour != discord.Embed.Empty \
+            if self.embed.colour != EmptyEmbed \
             else (0x20, 0x22, 0x25)  # default colour
 
     async def build_title(self):
         self.title = self.embed.title \
-            if self.embed.title != discord.Embed.Empty \
+            if self.embed.title != EmptyEmbed \
             else ""
 
         if self.title != "":
@@ -51,7 +56,7 @@ class BuildEmbed:
 
     async def build_description(self):
         self.description = self.embed.description \
-            if self.embed.description != discord.Embed.Empty \
+            if self.embed.description != EmptyEmbed \
             else ""
 
         if self.description != "":
@@ -74,18 +79,18 @@ class BuildEmbed:
 
     async def build_author(self):
         self.author = self.embed.author.name \
-            if self.embed.author.name != discord.Embed.Empty \
+            if self.embed.author.name != EmptyEmbed \
             else ""
 
         self.author = f'<a class="chatlog__embed-author-name-link" href="{self.embed.author.url}">{self.author}</a>' \
-            if self.embed.author.url != discord.Embed.Empty \
+            if self.embed.author.url != EmptyEmbed \
             else self.author
 
         author_icon = await fill_out(self.guild, embed_author_icon, [
             ("AUTHOR", self.author, PARSE_MODE_NONE),
             ("AUTHOR_ICON", self.embed.author.icon_url, PARSE_MODE_NONE)
         ]) \
-            if self.embed.author.icon_url != discord.Embed.Empty \
+            if self.embed.author.icon_url != EmptyEmbed \
             else ""
 
         if author_icon == "" and self.author != "":
@@ -97,21 +102,21 @@ class BuildEmbed:
         self.image = await fill_out(self.guild, embed_image, [
             ("EMBED_IMAGE", str(self.embed.image.proxy_url), PARSE_MODE_NONE)
         ]) \
-            if self.embed.image.url != discord.Embed.Empty \
+            if self.embed.image.url != EmptyEmbed \
             else ""
 
     async def build_thumbnail(self):
         self.thumbnail = await fill_out(self.guild, embed_thumbnail, [
             ("EMBED_THUMBNAIL", str(self.embed.thumbnail.url), PARSE_MODE_NONE)]) \
-            if self.embed.thumbnail.url != discord.Embed.Empty \
+            if self.embed.thumbnail.url != EmptyEmbed \
             else ""
 
     async def build_footer(self):
         footer = self.embed.footer.text \
-            if self.embed.footer.text != discord.Embed.Empty \
+            if self.embed.footer.text != EmptyEmbed \
             else ""
         footer_icon = self.embed.footer.icon_url \
-            if self.embed.footer.icon_url != discord.Embed.Empty \
+            if self.embed.footer.icon_url != EmptyEmbed \
             else None
 
         if footer != "":
