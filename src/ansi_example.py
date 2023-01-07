@@ -44,6 +44,8 @@ async def example(ctx):
     file = discord.File(BytesIO(transcript.encoded), "transcript.html")
 
     msg = await ctx.channel.send("Logging Channel...", file=file)
+
+    # By sending the file first, we can the url of that file and add it to the url of the online file viewer
     await msg.edit(content="Channel logged.",
                    embed=discord.Embed(
                        title="Transcript",
