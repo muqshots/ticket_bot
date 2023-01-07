@@ -2,5 +2,6 @@ discord
 discord-py-slash-command
 requests
 pytz
-emoji
+emoji==1.6.3
 grapheme
+ansi2html

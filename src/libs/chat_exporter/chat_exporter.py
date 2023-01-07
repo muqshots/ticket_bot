@@ -49,7 +49,7 @@ async def raw_export(
 ):
     # noinspection PyBroadException
     try:
-        return (await Transcript.raw_export(channel, messages, set_timezone)).html
+        return await Transcript.raw_export(channel, messages, set_timezone)
     except Exception:
         traceback.print_exc()
         print(f"Please send a screenshot of the above error to https://www.github.com/mahtoid/DiscordChatExporterPy")
@@ -98,6 +98,10 @@ class Transcript:
     messages: List[discord.Message]
     timezone_string: str
     html: Optional[str] = None
+    encoded: Optional[bytes] = None # This is able to store the html file without having those weird characters
+    # io.BytesIO(Transcript.encoded) -> BytesIO object
+    # io.BytesIO(Transcript.encoded).read() -> bytes object
+    # io.BytesIO(Transcript.encoded).read().decode(encoding="UTF-8") -> str object
 
     @classmethod
     async def export(
@@ -173,6 +177,7 @@ class Transcript:
             ("MESSAGES", message_html, PARSE_MODE_NONE),
             ("TIMEZONE", str(self.timezone_string)),
         ])
+        self.encoded = self.html.encode("cp1252")
 
 
 class Message:

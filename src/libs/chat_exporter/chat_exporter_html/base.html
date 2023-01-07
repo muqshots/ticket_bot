@@ -789,7 +789,9 @@
     <script>
       document.addEventListener("DOMContentLoaded", () => {
         document.querySelectorAll(".pre--multiline").forEach((block) => {
-          hljs.highlightBlock(block);
+          if (!block.classList.includes("nohljs")){
+            hljs.highlightBlock(block);
+          }
         });
       });
     </script>
